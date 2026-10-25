@@ -1,0 +1,19 @@
+{
+  "name": "northmark-backend-netlify",
+  "version": "1.0.0",
+  "description": "NORTHMARK Backend for Netlify Functions",
+  "main": "netlify/functions/api.js",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "mongodb": "^6.3.0",
+    "express": "^4.18.2",
+    "serverless-http": "^3.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.10.1"
+  }
+}
