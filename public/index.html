@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NORTHMARK Backend API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0B0B0B;
+            color: #FFFFFF;
+        }
+        h1 { color: #C9A227; }
+        .endpoint {
+            background: #1A1A1A;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 3px solid #C8102E;
+        }
+        code {
+            background: #2B2B2B;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 NORTHMARK Backend API</h1>
+    <p>Welcome to the NORTHMARK e-commerce backend API (Netlify Functions)</p>
+    
+    <h2>📋 API Endpoints</h2>
+    
+    <div class="endpoint">
+        <strong>GET</strong> <code>/api</code><br>
+        Health check - Returns API status
+    </div>
+    
+    <div class="endpoint">
+        <strong>GET</strong> <code>/api/products</code><br>
+        Get all products from MongoDB
+    </div>
+    
+    <div class="endpoint">
+        <strong>GET</strong> <code>/api/products/:id</code><br>
+        Get single product by ID
+    </div>
+    
+    <div class="endpoint">
+        <strong>POST</strong> <code>/api/orders</code><br>
+        Create a new order
+    </div>
+    
+    <div class="endpoint">
+        <strong>GET</strong> <code>/api/orders</code><br>
+        Get all orders
+    </div>
+    
+    <div class="endpoint">
+        <strong>POST</strong> <code>/api/newsletter/subscribe</code><br>
+        Subscribe to newsletter
+    </div>
+    
+    <h2>🔗 Frontend</h2>
+    <p><a href="https://zahraafzal.github.io/northmark-website/" style="color: #C9A227;">Visit NORTHMARK Website</a></p>
+    
+    <h2>📝 Status</h2>
+    <p id="status">Checking API...</p>
+    
+    <script>
+        fetch('/api')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('status').innerHTML = 
+                    '✅ API Status: <strong style="color: #4CAF50;">' + data.status + '</strong>';
+            })
+            .catch(err => {
+                document.getElementById('status').innerHTML = 
+                    '❌ API Status: <strong style="color: #C8102E;">Offline</strong>';
+            });
+    </script>
+</body>
+</html>
