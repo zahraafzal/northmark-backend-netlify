@@ -1,7 +1,7 @@
-const serverless = require('serverless-http');
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+const serverless = require("serverless-http");
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
 const app = express();
 
@@ -14,7 +14,7 @@ let isConnected = false;
 
 const connectDB = async () => {
   if (isConnected) {
-    console.log('Using existing MongoDB connection');
+    console.log("Using existing MongoDB connection");
     return;
   }
 
@@ -45,7 +45,7 @@ const productSchema = new mongoose.Schema({
     required: true,
   },
   comparePrice: Number,
-  image: String,  // Single image for simple products
+  image: String, // Single image for simple products
   images: [
     {
       url: String,
@@ -113,7 +113,8 @@ productSchema.pre("save", function (next) {
   next();
 });
 
-const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
+const Product =
+  mongoose.models.Product || mongoose.model("Product", productSchema);
 
 const orderSchema = new mongoose.Schema({
   orderNumber: {
@@ -209,62 +210,72 @@ const newsletterSchema = new mongoose.Schema({
   },
 });
 
-const Newsletter = mongoose.models.Newsletter || mongoose.model("Newsletter", newsletterSchema);
+const Newsletter =
+  mongoose.models.Newsletter || mongoose.model("Newsletter", newsletterSchema);
 
 // ================== ROUTES ==================
 
 // Health check
-app.get('/api', async (req, res) => {
+app.get("/api", async (req, res) => {
   try {
     await connectDB();
     res.json({
-      message: 'NORTHMARK Backend API (Netlify)',
-      status: 'running',
-      version: '1.0.0',
-      database: isConnected ? 'connected' : 'disconnected'
+      message: "NORTHMARK Backend API (Netlify)",
+      status: "running",
+      version: "1.0.0",
+      database: isConnected ? "connected" : "disconnected",
     });
   } catch (error) {
-    res.status(500).json({ message: 'Database connection error', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Database connection error", error: error.message });
   }
 });
 
 // ===== PRODUCT ROUTES =====
 
 // GET /api/products - Get all products
-app.get('/api/products', async (req, res) => {
+app.get("/api/products", async (req, res) => {
   try {
     await connectDB();
     const { category, audience, collection, sort, limit, featured } = req.query;
-    
+
     let query = {};
     if (category) query.category = category;
     if (audience) query.audience = audience;
     if (collection) query.collection = collection;
-    if (featured) query.featured = featured === 'true';
+    if (featured) query.featured = featured === "true";
 
     let products = Product.find(query);
-    
-    if (sort === 'price_low') products = products.sort({ price: 1 });
-    if (sort === 'price_high') products = products.sort({ price: -1 });
-    if (sort === 'newest') products = products.sort({ createdAt: -1 });
-    if (sort === 'rating') products = products.sort({ rating: -1 });
-    
+
+    if (sort === "price_low") products = products.sort({ price: 1 });
+    if (sort === "price_high") products = products.sort({ price: -1 });
+    if (sort === "newest") products = products.sort({ createdAt: -1 });
+    if (sort === "rating") products = products.sort({ rating: -1 });
+
     if (limit) products = products.limit(parseInt(limit));
 
     const result = await products;
     res.json({ success: true, count: result.length, products: result });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Products API Error:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message,
+        error: error.toString(),
+      });
   }
 });
 
 // GET /api/products/:id - Get single product
-app.get('/api/products/:id', async (req, res) => {
+app.get("/api/products/:id", async (req, res) => {
   try {
     await connectDB();
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
     res.json({ success: true, product });
   } catch (error) {
@@ -273,7 +284,7 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 // POST /api/products - Create product
-app.post('/api/products', async (req, res) => {
+app.post("/api/products", async (req, res) => {
   try {
     await connectDB();
     const product = await Product.create(req.body);
@@ -284,15 +295,15 @@ app.post('/api/products', async (req, res) => {
 });
 
 // PUT /api/products/:id - Update product
-app.put('/api/products/:id', async (req, res) => {
+app.put("/api/products/:id", async (req, res) => {
   try {
     await connectDB();
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true
+      runValidators: true,
     });
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
     res.json({ success: true, product });
   } catch (error) {
@@ -301,14 +312,14 @@ app.put('/api/products/:id', async (req, res) => {
 });
 
 // DELETE /api/products/:id - Delete product
-app.delete('/api/products/:id', async (req, res) => {
+app.delete("/api/products/:id", async (req, res) => {
   try {
     await connectDB();
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
-    res.json({ success: true, message: 'Product deleted' });
+    res.json({ success: true, message: "Product deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -317,20 +328,20 @@ app.delete('/api/products/:id', async (req, res) => {
 // ===== ORDER ROUTES =====
 
 // GET /api/orders - Get all orders
-app.get('/api/orders', async (req, res) => {
+app.get("/api/orders", async (req, res) => {
   try {
     await connectDB();
     const { status, email, limit } = req.query;
-    
+
     let query = {};
     if (status) query.status = status;
-    if (email) query['customer.email'] = email;
+    if (email) query["customer.email"] = email;
 
     let orders = Order.find(query).sort({ createdAt: -1 });
-    
+
     if (limit) orders = orders.limit(parseInt(limit));
 
-    const result = await orders.populate('items.product');
+    const result = await orders.populate("items.product");
     res.json({ success: true, count: result.length, orders: result });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -338,12 +349,12 @@ app.get('/api/orders', async (req, res) => {
 });
 
 // GET /api/orders/:id - Get single order
-app.get('/api/orders/:id', async (req, res) => {
+app.get("/api/orders/:id", async (req, res) => {
   try {
     await connectDB();
-    const order = await Order.findById(req.params.id).populate('items.product');
+    const order = await Order.findById(req.params.id).populate("items.product");
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
     res.json({ success: true, order });
   } catch (error) {
@@ -352,7 +363,7 @@ app.get('/api/orders/:id', async (req, res) => {
 });
 
 // POST /api/orders - Create order
-app.post('/api/orders', async (req, res) => {
+app.post("/api/orders", async (req, res) => {
   try {
     await connectDB();
     const order = await Order.create(req.body);
@@ -363,15 +374,15 @@ app.post('/api/orders', async (req, res) => {
 });
 
 // PUT /api/orders/:id - Update order
-app.put('/api/orders/:id', async (req, res) => {
+app.put("/api/orders/:id", async (req, res) => {
   try {
     await connectDB();
     const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true
+      runValidators: true,
     });
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
     res.json({ success: true, order });
   } catch (error) {
@@ -382,40 +393,44 @@ app.put('/api/orders/:id', async (req, res) => {
 // ===== NEWSLETTER ROUTES =====
 
 // POST /api/newsletter/subscribe - Subscribe to newsletter
-app.post('/api/newsletter/subscribe', async (req, res) => {
+app.post("/api/newsletter/subscribe", async (req, res) => {
   try {
     await connectDB();
     const { email } = req.body;
-    
+
     if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
+      return res.status(400).json({ message: "Email is required" });
     }
 
     // Check if already subscribed
     const existing = await Newsletter.findOne({ email });
     if (existing) {
       if (existing.isActive) {
-        return res.status(400).json({ message: 'Email already subscribed' });
+        return res.status(400).json({ message: "Email already subscribed" });
       } else {
         // Reactivate subscription
         existing.isActive = true;
         await existing.save();
-        return res.json({ success: true, message: 'Subscription reactivated' });
+        return res.json({ success: true, message: "Subscription reactivated" });
       }
     }
 
     const subscriber = await Newsletter.create({ email });
-    res.status(201).json({ success: true, message: 'Successfully subscribed', subscriber });
+    res
+      .status(201)
+      .json({ success: true, message: "Successfully subscribed", subscriber });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
 // GET /api/newsletter - Get all subscribers (admin)
-app.get('/api/newsletter', async (req, res) => {
+app.get("/api/newsletter", async (req, res) => {
   try {
     await connectDB();
-    const subscribers = await Newsletter.find({ isActive: true }).sort({ subscribedAt: -1 });
+    const subscribers = await Newsletter.find({ isActive: true }).sort({
+      subscribedAt: -1,
+    });
     res.json({ success: true, count: subscribers.length, subscribers });
   } catch (error) {
     res.status(500).json({ message: error.message });
